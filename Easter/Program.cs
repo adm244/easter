@@ -16,19 +16,26 @@ namespace Easter
     {
         static void Main(string[] args)
         {
-            //Package.Unpack(args[0]);
-
-            /*string[] archives = Directory.GetFiles(".", "*.g");
-            for (int i = 0; i < archives.Length; ++i)
-            {
-                Package.Unpack(archives[i]);
-            }*/
-
             //PGFDecode(args[0], args[0] + ".png");
             //PGFEncode(args[0], args[0] + ".pgf");
 
             //NOTE(adm244): packed json is just a "message pack" thing:
             // https://github.com/msgpack/msgpack/blob/master/spec.md
+
+            string filepath = Path.GetFullPath(args[0]);
+            string outputDirectory = Path.GetFullPath(args[1]);
+
+            using (FileStream stream = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+            {
+                using (GArchive archive = new GArchive(stream, GArchiveMode.Read))
+                {
+                    foreach (GArchiveEntry entry in archive.Entries)
+                    {
+                        string destinationPath = Path.GetFullPath(Path.Combine(outputDirectory, entry.FullName));
+                        entry.ExtractToFile(destinationPath);
+                    }
+                }
+            }
         }
 
         private static byte[] _pgfMagic = new byte[] { 0x50, 0x47, 0x46 };
@@ -59,6 +66,10 @@ namespace Easter
 
                     byte unk16Size = reader.ReadByte();
                     bool hasPallete = reader.ReadByte() != 0;
+
+                    //TODO(adm244): handle a palette (256 entries) that's appended to [width * height] buffer
+                    //NOTE(adm244): game's PGF parser ignores this palette by the way
+                    Debug.Assert(hasPallete == false);
 
                     //NOTE(adm244): skip garbage at 0x18
                     reader.BaseStream.Seek(unk16Size, SeekOrigin.Current);
