@@ -22,16 +22,37 @@ namespace Easter
             //NOTE(adm244): packed json is just a "message pack" thing:
             // https://github.com/msgpack/msgpack/blob/master/spec.md
 
-            string filepath = Path.GetFullPath(args[0]);
+            string inputDirectory = Path.GetFullPath(args[0]);
             string outputDirectory = Path.GetFullPath(args[1]);
 
-            using (FileStream stream = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+            string[] archiveFiles = Directory.GetFiles(inputDirectory, "*.g", SearchOption.TopDirectoryOnly);
+            for (int i = 0; i < archiveFiles.Length; ++i)
             {
+                Console.Write("Extracting {0}...", Path.GetFileName(archiveFiles[i]));
+
+                try
+                {
+                    Unpack(archiveFiles[i], outputDirectory);
+                    Console.WriteLine(" Done!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(" Failure!");
+                }
+            }
+        }
+
+        private static void Unpack(string sourceFile, string targetDirectory)
+        {
+            using (FileStream stream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read))
+            {
+                string archiveName = Path.GetFileNameWithoutExtension(sourceFile);
+
                 using (GArchive archive = new GArchive(stream, GArchiveMode.Read))
                 {
                     foreach (GArchiveEntry entry in archive.Entries)
                     {
-                        string destinationPath = Path.GetFullPath(Path.Combine(outputDirectory, entry.FullName));
+                        string destinationPath = Path.GetFullPath(Path.Combine(targetDirectory, archiveName, entry.FullName));
                         entry.ExtractToFile(destinationPath);
                     }
                 }
