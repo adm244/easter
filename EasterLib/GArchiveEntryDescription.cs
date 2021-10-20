@@ -9,11 +9,29 @@ namespace EasterLib
     {
         public string FullName;
         public UInt32 Offset;
-        public CompressionType Compression;
+        public GArchiveEntry.CompressionType Compression;
         public UInt32 Length;
         public UInt32 CompressedLength;
 
-        public static GArchiveEntryDescription Read(BinaryReader reader)
+        internal static GArchiveEntryDescription Create(GArchiveEntry entry)
+        {
+            if (entry == null)
+                throw new ArgumentNullException(nameof(entry));
+
+            //NOTE(adm244): be ware of data loss (int64 -> uint32)
+            // maybe we shouldn't support > uint32 at all?
+
+            return new GArchiveEntryDescription()
+            {
+                FullName = entry.FullName,
+                Offset = (UInt32)entry.Offset,
+                Compression = entry.Compression,
+                Length = (UInt32)entry.Length,
+                CompressedLength = (UInt32)entry.CompressedLength
+            };
+        }
+
+        internal static GArchiveEntryDescription Read(BinaryReader reader)
         {
             return new GArchiveEntryDescription()
             {
@@ -25,19 +43,21 @@ namespace EasterLib
             };
         }
 
-        private static CompressionType MapCompressionValue(UInt32 value)
+        internal void Write(BinaryWriter writer)
         {
-            if (!Enum.TryParse<CompressionType>(value.ToString(), out CompressionType result))
+            writer.WriteCString(FullName);
+            writer.Write((UInt32)Offset);
+            writer.Write((UInt32)Compression);
+            writer.Write((UInt32)Length);
+            writer.Write((UInt32)CompressedLength);
+        }
+
+        private static GArchiveEntry.CompressionType MapCompressionValue(UInt32 value)
+        {
+            if (!Enum.TryParse<GArchiveEntry.CompressionType>(value.ToString(), out GArchiveEntry.CompressionType result))
                 throw new ArgumentOutOfRangeException();
 
             return result;
-        }
-
-        public enum CompressionType
-        {
-            None,
-            LZ4,
-            ZSTD
         }
     }
 }

@@ -3,42 +3,36 @@ using System.IO;
 
 namespace EasterLib
 {
-    internal class SubStream : Stream
+    internal class ReadOnlySubStream : Stream
     {
         private Stream _superStream;
         private long _superStreamOffsetStart;
         private long _superStreamOffsetEnd;
         private long _superStreamPosition;
-        private long _length;
 
-        public SubStream(Stream superStream, long offset, long length)
+        public ReadOnlySubStream(Stream superStream, long offset, long length)
         {
+            if (superStream == null)
+                throw new ArgumentNullException(nameof(superStream));
+
             _superStream = superStream;
             _superStreamOffsetStart = offset;
             _superStreamOffsetEnd = offset + length;
             _superStreamPosition = offset;
-            _length = length;
         }
 
-        public override bool CanRead { get { return _superStream.CanRead; } }
+        public override bool CanRead => _superStream.CanRead;
 
-        public override bool CanSeek { get { return false; } }
+        public override bool CanSeek => false;
 
-        public override bool CanWrite { get { return false; } }
+        public override bool CanWrite => false;
 
-        public override long Length { get { return _superStreamOffsetEnd - _superStreamOffsetStart; } }
+        public override long Length => _superStreamOffsetEnd - _superStreamOffsetStart;
 
         public override long Position
         {
-            get
-            {
-                return _superStreamPosition - _superStreamOffsetStart;
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get => _superStreamPosition - _superStreamOffsetStart;
+            set => throw new NotSupportedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)

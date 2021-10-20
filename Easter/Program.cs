@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -25,6 +26,65 @@ namespace Easter
             string inputDirectory = Path.GetFullPath(args[0]);
             string outputDirectory = Path.GetFullPath(args[1]);
 
+            //UnpackAll(inputDirectory, outputDirectory);
+
+            string[] folders = Directory.GetDirectories(inputDirectory);
+            for (int i = 0; i < folders.Length; ++i)
+            {
+                string archiveName = Path.GetFileName(Path.TrimEndingDirectorySeparator(folders[i]));
+                string outputFile = string.Format("{0}{1}", Path.Combine(outputDirectory, archiveName), ".g");
+
+                Console.Write("Packing {0}...", archiveName);
+
+                //try
+                //{
+                    Pack(folders[i], outputFile, GArchiveEntry.CompressionType.ZSTD);
+                    Console.WriteLine(" Done!");
+                //}
+                //catch
+                //{
+                //    Console.WriteLine(" Failure!");
+                //}
+            }
+        }
+
+        private static void Pack(string inputDirectory, string outputFile, GArchiveEntry.CompressionType compressionType)
+        {
+            string[] files = GetAllFilesRecursive(inputDirectory);
+
+            using (FileStream stream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            {
+                using (GArchive archive = new GArchive(stream, GArchiveMode.Create))
+                {
+                    for (int i = 0; i < files.Length; ++i)
+                    {
+                        //FIX(adm244): make sure a FORWARD SLASH is used as path separator
+                        string relativePath = Path.GetRelativePath(inputDirectory, files[i]);
+                        archive.CreateEntry(files[i], relativePath, compressionType);
+                    }
+
+                    archive.WriteEntries();
+                }
+            }
+        }
+
+        private static string[] GetAllFilesRecursive(string directory)
+        {
+            List<string> files = new List<string>();
+
+            files.AddRange(Directory.GetFiles(directory));
+
+            string[] subDirectories = Directory.GetDirectories(directory);
+            for (int i = 0; i < subDirectories.Length; ++i)
+            {
+                files.AddRange(GetAllFilesRecursive(subDirectories[i]));
+            }
+
+            return files.ToArray();
+        }
+
+        private static void UnpackAll(string inputDirectory, string outputDirectory)
+        {
             string[] archiveFiles = Directory.GetFiles(inputDirectory, "*.g", SearchOption.TopDirectoryOnly);
             for (int i = 0; i < archiveFiles.Length; ++i)
             {
