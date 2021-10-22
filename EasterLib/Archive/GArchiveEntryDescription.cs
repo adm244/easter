@@ -3,7 +3,7 @@ using System.IO;
 
 using EasterLib.Extensions;
 
-namespace EasterLib
+namespace EasterLib.Archive
 {
     internal struct GArchiveEntryDescription
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace EasterLib
+namespace EasterLib.Archive
 {
     internal class ReadOnlySubStream : Stream
     {

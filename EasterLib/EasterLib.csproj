@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.2.13" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
     <PackageReference Include="Zstandard.Net" Version="1.1.7" />
   </ItemGroup>
 

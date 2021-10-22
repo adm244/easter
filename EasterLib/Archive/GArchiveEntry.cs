@@ -4,7 +4,7 @@ using System.IO.Compression;
 
 using Zstandard.Net;
 
-namespace EasterLib
+namespace EasterLib.Archive
 {
     public class GArchiveEntry
     {

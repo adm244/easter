@@ -1,4 +1,4 @@
-﻿namespace EasterLib
+﻿namespace EasterLib.Archive
 {
     public enum GArchiveMode
     {
