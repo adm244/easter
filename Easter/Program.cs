@@ -58,7 +58,6 @@ namespace Easter
                 {
                     for (int i = 0; i < files.Length; ++i)
                     {
-                        //FIX(adm244): make sure a FORWARD SLASH is used as path separator
                         string relativePath = Path.GetRelativePath(inputDirectory, files[i]);
                         archive.CreateEntry(files[i], relativePath, compressionType);
                     }

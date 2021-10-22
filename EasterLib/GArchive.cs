@@ -78,9 +78,11 @@ namespace EasterLib
             if (_mode == GArchiveMode.Read)
                 throw new NotSupportedException(CannotCreateInReadMode);
 
+            string targetUnixified = target.Replace('\\', '/');
+
             //TODO(adm244): maybe check for duplicates?
 
-            GArchiveEntry createdEntry = new GArchiveEntry(this, source, target, compressionType);
+            GArchiveEntry createdEntry = new GArchiveEntry(this, source, targetUnixified, compressionType);
 
             _entries.Add(createdEntry);
 
